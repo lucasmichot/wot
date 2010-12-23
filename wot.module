@@ -1,0 +1,109 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Functions for the WOT module.
+ */
+
+/**
+ * Implements hook_init().
+ */
+function wot_init() {
+  if ($wot = variable_get('wot', NULL) && drupal_is_front_page()) {
+    $element = array(
+      '#tag' => 'meta',
+      '#attributes' => array(
+        'name' => 'wot-verification',
+        'content' => $wot,
+      ),
+    );
+    drupal_add_html_head($element, 'wot');
+  }
+}
+
+/**
+ * Implements hook_requirements().
+ */
+function wot_requirements($phase) {
+  if ($phase == 'runtime' && variable_get('wot', NULL) == NULL) {
+    $requirements = array();
+    $requirements['googleanalytics'] = array(
+      'title' => t('Web of Trust'),
+      'description' => t('WOT module has not been configured yet. Please configure its settings from the <a href="@url">WOT settings page</a>.', array('@url' => url('admin/config/search/wot'))),
+      'severity' => REQUIREMENT_ERROR,
+      'value' => t('Not configured'),
+    );
+    return $requirements;
+  }
+}
+
+/**
+ * Implements hook_help().
+ */
+function wot_help($path, $arg) {
+  $message = NULL;
+
+  switch ($path) {
+    case 'admin/help#wot':
+      $message .= '<p>' . t('Register at <a href="@url">WOT website</a> to get your verification code.', array('@url' => url('http://www.mywot.com/', array('absolute' => TRUE, 'attributes' => array('target' => '_blank'))))) . '</p>';
+      $message .= '<p>' . t('<a href="@url">Extensions and plugins</a> are available for Firefox, Chrome, Internet Explorer and Safari.', array('@url' => url('http://www.mywot.com/download', array('absolute' => TRUE, 'attributes' => array('target' => '_blank'))))) . '</p>';
+      break;
+
+    case 'admin/config/search/wot':
+      $message .= '<p>' . t('Please set your Web of Trust verification code.') . '</p>';
+      break;
+  }
+
+  return $message;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function wot_menu() {
+  $items = array();
+  $items['admin/config/search/wot'] = array(
+    'title' => 'WOT',
+    'description' => 'Manage Web of Trust settings.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('wot_admin_settings'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer website'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'wot.admin.inc',
+  );
+  return $items;
+}
+
+/**
+ * Validate wot_admin_settings form.
+ */
+function wot_admin_settings_validate($form, &$form_state) {
+  variable_del('wot');
+  $wot = drupal_strtolower(trim($form_state['values']['wot']));
+  $form_state['values']['wot'] = $wot;
+  if (empty($wot)) {
+    drupal_set_message(t('WOT verification code is empty.'), 'warning');
+  }
+  elseif (ctype_xdigit($wot) == FALSE) {
+    form_set_error('wot', t('Unvalid WOT verification code : only digits and hexadecimal characters are allowed'));
+  }
+}
+
+/**
+ * Submit wot_admin_settings form.
+ */
+function wot_admin_settings_submit($form, &$form_state) {
+  variable_set('wot', $form_state['values']['wot']);
+  drupal_set_message(t('The configuration options have been saved.'));
+}
+
+/**
+ * Submit Reset button from wot_admin_settings form.
+ */
+function wot_admin_settings_reset_submit($form, &$form_state) {
+  variable_del('wot');
+  drupal_set_message(t('The configuration options have been reset to their default values.'));
+}
+

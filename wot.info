@@ -1,0 +1,9 @@
+; $Id:
+name = Web of Trust
+description = "Allows to add WOT verification code to your website."
+core = 7.x
+files[] = wot.install
+files[] = wot.module
+files[] = wot.admin.inc
+configure = admin/config/search/wot
+version = 7.x

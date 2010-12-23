@@ -1,0 +1,16 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Set WOT verification code meta tag.
+ * Install and uninstall functions.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function wot_uninstall() {
+  variable_del('wot');
+}
+
