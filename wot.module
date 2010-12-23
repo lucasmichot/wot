@@ -26,9 +26,9 @@ function wot_init() {
  * Implements hook_requirements().
  */
 function wot_requirements($phase) {
-  if ($phase == 'runtime' && variable_get('wot', NULL) == NULL) {
+  if ($phase == 'runtime' && empty(variable_get('wot', NULL))) {
     $requirements = array();
-    $requirements['googleanalytics'] = array(
+    $requirements['wot'] = array(
       'title' => t('Web of Trust'),
       'description' => t('WOT module has not been configured yet. Please configure its settings from the <a href="@url">WOT settings page</a>.', array('@url' => url('admin/config/search/wot'))),
       'severity' => REQUIREMENT_ERROR,
